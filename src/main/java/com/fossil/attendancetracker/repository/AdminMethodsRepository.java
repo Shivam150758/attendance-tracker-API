@@ -1,5 +1,6 @@
 package com.fossil.attendancetracker.repository;
 
+import com.fossil.attendancetracker.model.ApprovalList;
 import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
 import org.springframework.http.ResponseEntity;
@@ -21,4 +22,8 @@ public interface AdminMethodsRepository {
     List<String> getAllDistinctMonths();
 
     MonthlyAttendance getUserMonthlyAttendance(MonthlyAttendance monthlyAttendance);
+
+    ApprovalList getApprovalList(String raisedBy, String raisedTo);
+
+    String saveApprovalList(ApprovalList approvalList);
 }

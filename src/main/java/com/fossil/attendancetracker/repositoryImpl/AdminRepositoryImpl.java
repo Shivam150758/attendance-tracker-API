@@ -1,14 +1,13 @@
 package com.fossil.attendancetracker.repositoryImpl;
 
+import com.fossil.attendancetracker.model.ApprovalList;
 import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
 import com.fossil.attendancetracker.repository.AdminMethodsRepository;
 import com.fossil.attendancetracker.repository.MonthlyAttendanceRepository;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,4 +242,60 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         }
     }
 
+    @Override
+    public ApprovalList getApprovalList(String raisedBy, String raisedTo) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("approvalList");
+
+        List<Document> raisedByList = new ArrayList<>();
+        List<Document> raisedToList = new ArrayList<>();
+
+        FindIterable<Document> raisedByResults = collection.find(new Document("raisedBy", raisedBy));
+        for (Document doc : raisedByResults) {
+            raisedByList.add(doc);
+        }
+
+        FindIterable<Document> raisedToResults = collection.find(new Document("raisedTo", raisedTo));
+        for (Document doc : raisedToResults) {
+            raisedToList.add(doc);
+        }
+
+        ApprovalList approvalList = new ApprovalList();
+        approvalList.setRaisedByList(raisedByList);
+        approvalList.setRaisedToList(raisedToList);
+
+        return approvalList;
+    }
+
+    @Override
+    public String saveApprovalList(ApprovalList approvalList) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("approvalList");
+
+        Document query = new Document("_id", approvalList.getId());
+        Document existingDocument = collection.find(query).first();
+
+        if (existingDocument != null) {
+            return "Error: ApprovalList with this ID already exists.";
+        }
+
+        Document document = new Document("_id", approvalList.getId())
+                .append("date", approvalList.getDate())
+                .append("year", approvalList.getYear())
+                .append("quarter", approvalList.getQuarter())
+                .append("month", approvalList.getMonth())
+                .append("raisedBy", approvalList.getRaisedBy())
+                .append("raisedTo", approvalList.getRaisedTo())
+                .append("comments", approvalList.getComments())
+                .append("status", approvalList.getStatus())
+                .append("type", approvalList.getType())
+                .append("prevAttendance", approvalList.getPrevAttendance())
+                .append("prevShift", approvalList.getPrevShift())
+                .append("newAttendance", approvalList.getNewAttendance())
+                .append("newShift", approvalList.getNewShift());
+
+        collection.insertOne(document);
+
+        return "ApprovalList saved successfully.";
+    }
 }

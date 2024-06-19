@@ -1,5 +1,6 @@
 package com.fossil.attendancetracker.controller;
 
+import com.fossil.attendancetracker.model.ApprovalList;
 import com.fossil.attendancetracker.model.Attendance;
 import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
@@ -46,5 +47,15 @@ public class AdminController {
     @PostMapping(value = "/userMonthlyAttendance")
     public MonthlyAttendance getUserMonthlyAttendance(@RequestBody MonthlyAttendance monthlyAttendance) {
         return  adminMethodsRepository.getUserMonthlyAttendance(monthlyAttendance);
+    }
+
+    @PostMapping(value = "/requestApproval")
+    public ApprovalList getApprovalList(@RequestBody ApprovalList approvalList) {
+        return adminMethodsRepository.getApprovalList(approvalList.getRaisedBy(), approvalList.getRaisedTo());
+    }
+
+    @PostMapping(value = "/saveForApproval")
+    public String saveApprovalRequest(@RequestBody ApprovalList approvalList) {
+        return adminMethodsRepository.saveApprovalList(approvalList);
     }
 }
