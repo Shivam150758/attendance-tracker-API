@@ -147,6 +147,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                 authenticatedUser.setEmailId(found.getString("emailId"));
                 authenticatedUser.setPassword(found.getString("password"));
                 authenticatedUser.setManagerId(found.getString("managerId"));
+                authenticatedUser.setShift(found.getString("shift"));
                 authenticatedUser.setLastLogin(new Date());
 
                 return ResponseEntity.ok(authenticatedUser);

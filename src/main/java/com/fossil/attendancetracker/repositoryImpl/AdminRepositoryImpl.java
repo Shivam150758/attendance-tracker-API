@@ -1,21 +1,30 @@
 package com.fossil.attendancetracker.repositoryImpl;
 
 import com.fossil.attendancetracker.model.ApprovalList;
+import com.fossil.attendancetracker.model.Attendance;
 import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
 import com.fossil.attendancetracker.repository.AdminMethodsRepository;
+import com.fossil.attendancetracker.repository.AttendanceRepository;
 import com.fossil.attendancetracker.repository.MonthlyAttendanceRepository;
+import com.fossil.attendancetracker.repository.QtrAttendanceRepository;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
+import static com.mongodb.client.model.Filters.eq;
 
 public class AdminRepositoryImpl implements AdminMethodsRepository {
 
@@ -25,6 +34,12 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
     @Autowired
     MonthlyAttendanceRepository monthlyAttendanceRepository;
 
+    @Autowired
+    AttendanceRepository attendanceRepository;
+
+    @Autowired
+    QtrAttendanceRepository qtrAttendanceRepository;
+
     @Override
     public List<QtrAttendance> getAllUserAttendance(String quarter, String year) {
 
@@ -32,8 +47,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         MongoCollection<Document> collection = database.getCollection("qtrAttendance");
 
         Bson filter = Filters.and(
-                Filters.eq("year", year),
-                Filters.eq("quarter", quarter)
+                eq("year", year),
+                eq("quarter", quarter)
         );
 
         List<QtrAttendance> attendanceList = new ArrayList<>();
@@ -63,8 +78,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         MongoCollection<Document> collection = database.getCollection("monthlyAttendance");
 
         Bson filter = Filters.and(
-                Filters.eq("year", year),
-                Filters.eq("month", month)
+                eq("year", year),
+                eq("month", month)
         );
 
         List<MonthlyAttendance> attendanceList = new ArrayList<>();
@@ -233,7 +248,7 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
     public MonthlyAttendance getUserMonthlyAttendance(MonthlyAttendance monthlyAttendance) {
         MongoDatabase database = client.getDatabase("digital-GBS");
         MongoCollection<Document> collection2 = database.getCollection("monthlyAttendance");
-        Document found = collection2.find(Filters.eq("_id", monthlyAttendance.getId())).first();
+        Document found = collection2.find(eq("_id", monthlyAttendance.getId())).first();
 
         if (found != null) {
             return new MonthlyAttendance(found);
@@ -272,15 +287,22 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         MongoDatabase database = client.getDatabase("digital-GBS");
         MongoCollection<Document> collection = database.getCollection("approvalList");
 
-        Document query = new Document("_id", approvalList.getId());
+        Document query = new Document("date", approvalList.getDate())
+                .append("status", new Document("$in", Arrays.asList("Pending", "Extra WFH")))
+                .append("raisedBy", approvalList.getRaisedBy());
         Document existingDocument = collection.find(query).first();
 
         if (existingDocument != null) {
             return "Error: ApprovalList with this ID already exists.";
         }
 
-        Document document = new Document("_id", approvalList.getId())
+        if (approvalList.getId() == null || approvalList.getId().isEmpty()) {
+            approvalList.setId(UUID.randomUUID().toString());
+        }
+
+        Document document = new Document("newShift", approvalList.getNewShift())
                 .append("date", approvalList.getDate())
+                .append("name", approvalList.getName())
                 .append("year", approvalList.getYear())
                 .append("quarter", approvalList.getQuarter())
                 .append("month", approvalList.getMonth())
@@ -292,10 +314,113 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 .append("prevAttendance", approvalList.getPrevAttendance())
                 .append("prevShift", approvalList.getPrevShift())
                 .append("newAttendance", approvalList.getNewAttendance())
-                .append("newShift", approvalList.getNewShift());
+                .append("_id", approvalList.getId());
 
         collection.insertOne(document);
 
         return "ApprovalList saved successfully.";
+    }
+
+    @Override
+    public String updateAttendanceData(ApprovalList approvalList) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("approvalList");
+
+        Document query = new Document("_id", approvalList.getId());
+
+        switch (approvalList.getStatus()) {
+            case "Approved":
+                updateApprovalStatus(collection, query, "Approved");
+                updateAttendance(approvalList);
+                updateMonthlyAttendance(approvalList);
+                updateQuarterlyAttendance(approvalList);
+                break;
+
+            case "Rejected":
+                updateApprovalStatus(collection, query, "Rejected");
+                break;
+
+            case "Delete":
+                DeleteResult deleteResult = collection.deleteOne(query);
+                return "ApprovalList with the specified emailId and date deleted successfully.";
+
+            default:
+                return "Invalid status";
+        }
+
+        return "Updated";
+    }
+
+    private void updateApprovalStatus(MongoCollection<Document> collection, Document query, String status) {
+        collection.updateOne(query, new Document("$set", new Document("status", status)));
+    }
+
+    private void updateAttendance(ApprovalList approvalList) {
+        String idAttendance = approvalList.getRaisedBy() + approvalList.getDate();
+        Attendance attendance = attendanceRepository.findById(idAttendance).orElse(new Attendance());
+        attendance.setId(idAttendance);
+        attendance.setEmailId(approvalList.getRaisedBy());
+        attendance.setDate(approvalList.getDate());
+        attendance.setAttendance(approvalList.getNewAttendance());
+        attendance.setYear(approvalList.getYear());
+        attendance.setQuarter(approvalList.getQuarter());
+        attendance.setMonth(approvalList.getMonth());
+        attendance.setShift(approvalList.getNewShift());
+        attendance.setLastUpdatedBy(approvalList.getRaisedTo());
+        attendance.setLastUpdatedOn(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MMMM-yyyy HH:mm:ss")));
+        attendanceRepository.save(attendance);
+    }
+
+    private void updateMonthlyAttendance(ApprovalList approvalList) {
+        String idMthAtt = approvalList.getRaisedBy() + approvalList.getQuarter() + approvalList.getYear() + "_" + approvalList.getMonth();
+        MonthlyAttendance monthlyAttendance = monthlyAttendanceRepository.findById(idMthAtt).orElse(new MonthlyAttendance());
+        monthlyAttendance.setId(idMthAtt);
+        monthlyAttendance.setName(approvalList.getName());
+        monthlyAttendance.setEmailId(approvalList.getRaisedBy());
+        monthlyAttendance.setYear(approvalList.getYear());
+        monthlyAttendance.setQuarter(approvalList.getQuarter());
+        monthlyAttendance.setMonth(approvalList.getMonth());
+
+        adjustAttendanceCounts(monthlyAttendance, approvalList.getNewAttendance(), 1);
+        adjustAttendanceCounts(monthlyAttendance, approvalList.getPrevAttendance(), -1);
+
+        monthlyAttendanceRepository.save(monthlyAttendance);
+    }
+
+    private void updateQuarterlyAttendance(ApprovalList approvalList) {
+        String idQtr = approvalList.getRaisedBy() + approvalList.getQuarter() + approvalList.getYear();
+        QtrAttendance qtrAttendance = qtrAttendanceRepository.findById(idQtr).orElse(new QtrAttendance());
+        qtrAttendance.setId(idQtr);
+        qtrAttendance.setName(approvalList.getName());
+        qtrAttendance.setEmailId(approvalList.getRaisedBy());
+        qtrAttendance.setYear(approvalList.getYear());
+        qtrAttendance.setQuarter(approvalList.getQuarter());
+
+        adjustAttendanceCounts(qtrAttendance, approvalList.getNewAttendance(), 1);
+        adjustAttendanceCounts(qtrAttendance, approvalList.getPrevAttendance(), -1);
+
+        qtrAttendanceRepository.save(qtrAttendance);
+    }
+
+    private void adjustAttendanceCounts(Object attendance, String attendanceType, int increment) {
+        if (attendance instanceof MonthlyAttendance monthlyAttendance) {
+            switch (attendanceType) {
+                case "Work From Home" -> monthlyAttendance.setWfh(monthlyAttendance.getWfh() + increment);
+                case "Work From Office" -> monthlyAttendance.setWfo(monthlyAttendance.getWfo() + increment);
+                case "Work From Office - Friday" -> monthlyAttendance.setWfoFriday(monthlyAttendance.getWfoFriday() + increment);
+                case "Work From Home - Friday" -> monthlyAttendance.setWfhFriday(monthlyAttendance.getWfhFriday() + increment);
+                case "Leave" -> monthlyAttendance.setLeaves(monthlyAttendance.getLeaves() + increment);
+                case "Public Holiday" -> monthlyAttendance.setHolidays(monthlyAttendance.getHolidays() + increment);
+            }
+        } else if (attendance instanceof QtrAttendance qtrAttendance) {
+            switch (attendanceType) {
+                case "Work From Home" -> qtrAttendance.setWfh(qtrAttendance.getWfh() + increment);
+                case "Work From Office" -> qtrAttendance.setWfo(qtrAttendance.getWfo() + increment);
+                case "Work From Office - Friday" -> qtrAttendance.setWfoFriday(qtrAttendance.getWfoFriday() + increment);
+                case "Work From Home - Friday" -> qtrAttendance.setWfhFriday(qtrAttendance.getWfhFriday() + increment);
+                case "Leave" -> qtrAttendance.setLeaves(qtrAttendance.getLeaves() + increment);
+                case "Public Holiday" -> qtrAttendance.setHolidays(qtrAttendance.getHolidays() + increment);
+            }
+        }
     }
 }

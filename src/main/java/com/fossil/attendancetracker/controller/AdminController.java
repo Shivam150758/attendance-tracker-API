@@ -58,4 +58,14 @@ public class AdminController {
     public String saveApprovalRequest(@RequestBody ApprovalList approvalList) {
         return adminMethodsRepository.saveApprovalList(approvalList);
     }
+
+    @PostMapping(value = "/updateAttendance")
+    public String updateAttendance(@RequestBody ApprovalList approvalList) {
+        return adminMethodsRepository.updateAttendanceData(approvalList);
+    }
+
+//    @PostMapping(value = "/rejectRequest")
+//    public String rejectUpdateRequest(@RequestBody ApprovalList approvalList) {
+//        return
+//    }
 }

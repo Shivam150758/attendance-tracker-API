@@ -24,6 +24,7 @@ public class ApprovalList {
     private String year;
     private String quarter;
     private String month;
+    private String name;
 
     public String getNewAttendance() {
         return newAttendance;
@@ -151,5 +152,13 @@ public class ApprovalList {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

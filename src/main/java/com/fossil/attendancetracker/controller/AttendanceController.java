@@ -41,12 +41,17 @@ public class AttendanceController {
 
     @PostMapping(value = "/addMonthlyAttendance")
     public ResponseEntity<?> addUserMonthlyAttendance(@RequestBody MonthlyAttendance monthlyAttendance) {
-        return  adminMethodsRepository.addUserMonthlyAttendance(monthlyAttendance);
+        return adminMethodsRepository.addUserMonthlyAttendance(monthlyAttendance);
     }
 
     @PostMapping(value = "/getUserAttendance")
     public QtrAttendance getUserAttendance(@RequestBody QtrAttendance qtrAttendance) {
         return dateWiseRepository.getUserAttendance(qtrAttendance);
+    }
+
+    @PostMapping(value = "/detailedAttendanceQtr")
+    public List<Attendance> getDetailedUserAttendanceQtr(@RequestBody Attendance attendance) {
+        return attendanceRepo.findByEmailIdAndQuarterAndYear(attendance.getEmailId(), attendance.getQuarter(), attendance.getYear());
     }
 
     @PostMapping(value = "/detailedAttendance")

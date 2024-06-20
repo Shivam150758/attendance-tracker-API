@@ -26,4 +26,6 @@ public interface AdminMethodsRepository {
     ApprovalList getApprovalList(String raisedBy, String raisedTo);
 
     String saveApprovalList(ApprovalList approvalList);
+
+    String updateAttendanceData(ApprovalList approvalList);
 }

@@ -10,4 +10,6 @@ import java.util.List;
 public interface AttendanceRepository extends MongoRepository<Attendance, String> {
 
     List<Attendance> findByEmailIdAndQuarterAndYearAndMonth(String emailId, String quarter, String year, String month);
+
+    List<Attendance> findByEmailIdAndQuarterAndYear(String emailId, String quarter, String year);
 }
