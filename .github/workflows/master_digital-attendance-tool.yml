@@ -47,6 +47,9 @@ jobs:
         with:
           name: java-app
 
+      - name: Configure AZURE_HTTP_USER_AGENT
+        run: echo "AZURE_HTTP_USER_AGENT=GITHUBACTIONS_DeployWebAppToAzure_259fe3f8e70eb42eecffaedfea06d32773023d0eeb5a2325f73225348285c1ec" >> $GITHUB_ENV
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2.1.0
