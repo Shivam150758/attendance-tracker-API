@@ -10,9 +10,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.set;
-
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -27,6 +24,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
+
 @Component
 public class SearchRepositoryImpl implements SearchRepository {
 
@@ -38,6 +38,18 @@ public class SearchRepositoryImpl implements SearchRepository {
 
     @Autowired
     UsersRepository usersRepo;
+
+    private static Users getUsers(Users user) {
+        Users authenticatedUser = new Users();
+        authenticatedUser.setId(user.getEmailId());
+        authenticatedUser.setEmailId(user.getEmailId());
+        authenticatedUser.setName(user.getName());
+        authenticatedUser.setTeam(user.getTeam());
+        authenticatedUser.setPassword(user.getPassword());
+        authenticatedUser.setManagerId(user.getManagerId());
+        authenticatedUser.setLastLogin(new Date());
+        return authenticatedUser;
+    }
 
     @Override
     public List<Users> findUserbyEmail(String text) {
@@ -116,18 +128,6 @@ public class SearchRepositoryImpl implements SearchRepository {
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorMessage("User already exist"));
         }
-    }
-
-    private static Users getUsers(Users user) {
-        Users authenticatedUser = new Users();
-        authenticatedUser.setId(user.getEmailId());
-        authenticatedUser.setEmailId(user.getEmailId());
-        authenticatedUser.setName(user.getName());
-        authenticatedUser.setTeam(user.getTeam());
-        authenticatedUser.setPassword(user.getPassword());
-        authenticatedUser.setManagerId(user.getManagerId());
-        authenticatedUser.setLastLogin(new Date());
-        return authenticatedUser;
     }
 
     @Override

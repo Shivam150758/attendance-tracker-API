@@ -20,22 +20,22 @@ public class AdminController {
     AdminMethodsRepository adminMethodsRepository;
 
     @PostMapping(value = "/adminQtrReport")
-    public List<QtrAttendance> getAllUserAttendance(@RequestBody Attendance attendance){
+    public List<QtrAttendance> getAllUserAttendance(@RequestBody Attendance attendance) {
         return adminMethodsRepository.getAllUserAttendance(attendance.getQuarter(), attendance.getYear());
     }
 
     @PostMapping(value = "/adminMthReport")
-    public List<MonthlyAttendance> getAllUserMthAttendance(@RequestBody MonthlyAttendance attendance){
+    public List<MonthlyAttendance> getAllUserMthAttendance(@RequestBody MonthlyAttendance attendance) {
         return adminMethodsRepository.getAllUserMthAttendance(attendance.getMonth(), attendance.getYear());
     }
 
     @GetMapping(value = "/distinctYears")
-    public List<String> getDistinctYearValues(){
+    public List<String> getDistinctYearValues() {
         return adminMethodsRepository.getAllDistinctYears();
     }
 
     @GetMapping(value = "/distinctQuarters")
-    public List<String> getDistinctQtrValues(){
+    public List<String> getDistinctQtrValues() {
         return adminMethodsRepository.getAllDistinctQuarters();
     }
 
@@ -46,7 +46,7 @@ public class AdminController {
 
     @PostMapping(value = "/userMonthlyAttendance")
     public MonthlyAttendance getUserMonthlyAttendance(@RequestBody MonthlyAttendance monthlyAttendance) {
-        return  adminMethodsRepository.getUserMonthlyAttendance(monthlyAttendance);
+        return adminMethodsRepository.getUserMonthlyAttendance(monthlyAttendance);
     }
 
     @PostMapping(value = "/requestApproval")
@@ -63,9 +63,4 @@ public class AdminController {
     public String updateAttendance(@RequestBody ApprovalList approvalList) {
         return adminMethodsRepository.updateAttendanceData(approvalList);
     }
-
-//    @PostMapping(value = "/rejectRequest")
-//    public String rejectUpdateRequest(@RequestBody ApprovalList approvalList) {
-//        return
-//    }
 }

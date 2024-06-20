@@ -10,7 +10,6 @@ import com.fossil.attendancetracker.repository.MonthlyAttendanceRepository;
 import com.fossil.attendancetracker.repository.QtrAttendanceRepository;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +38,68 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
 
     @Autowired
     QtrAttendanceRepository qtrAttendanceRepository;
+
+    private static MonthlyAttendance setAttendanceForNewUser(MonthlyAttendance attendance) {
+        MonthlyAttendance monthlyAttendance = new MonthlyAttendance();
+        monthlyAttendance.setId(attendance.getId());
+        monthlyAttendance.setEmailId(attendance.getEmailId());
+        monthlyAttendance.setQuarter(attendance.getQuarter());
+        monthlyAttendance.setYear(attendance.getYear());
+        monthlyAttendance.setMonth(attendance.getMonth());
+        monthlyAttendance.setName(attendance.getName());
+
+        switch (attendance.getAttendance()) {
+            case "Work From Home" -> {
+                monthlyAttendance.setWfh(1);
+                monthlyAttendance.setWfo(0);
+                monthlyAttendance.setWfhFriday(0);
+                monthlyAttendance.setWfoFriday(0);
+                monthlyAttendance.setHolidays(0);
+                monthlyAttendance.setLeaves(0);
+            }
+            case "Work From Office" -> {
+                monthlyAttendance.setWfh(0);
+                monthlyAttendance.setWfo(1);
+                monthlyAttendance.setWfhFriday(0);
+                monthlyAttendance.setWfoFriday(0);
+                monthlyAttendance.setHolidays(0);
+                monthlyAttendance.setLeaves(0);
+            }
+            case "Public Holiday" -> {
+                monthlyAttendance.setWfh(0);
+                monthlyAttendance.setWfo(0);
+                monthlyAttendance.setWfhFriday(0);
+                monthlyAttendance.setWfoFriday(0);
+                monthlyAttendance.setHolidays(1);
+                monthlyAttendance.setLeaves(0);
+            }
+            case "Leave" -> {
+                monthlyAttendance.setWfh(0);
+                monthlyAttendance.setWfo(0);
+                monthlyAttendance.setWfhFriday(0);
+                monthlyAttendance.setWfoFriday(0);
+                monthlyAttendance.setHolidays(0);
+                monthlyAttendance.setLeaves(1);
+            }
+            case "Work From Office - Friday" -> {
+                monthlyAttendance.setWfh(0);
+                monthlyAttendance.setWfo(0);
+                monthlyAttendance.setWfhFriday(0);
+                monthlyAttendance.setWfoFriday(1);
+                monthlyAttendance.setHolidays(0);
+                monthlyAttendance.setLeaves(0);
+            }
+            case "Work From Home - Friday" -> {
+                monthlyAttendance.setWfh(0);
+                monthlyAttendance.setWfo(0);
+                monthlyAttendance.setWfhFriday(1);
+                monthlyAttendance.setWfoFriday(0);
+                monthlyAttendance.setHolidays(0);
+                monthlyAttendance.setLeaves(0);
+            }
+        }
+        return monthlyAttendance;
+    }
 
     @Override
     public List<QtrAttendance> getAllUserAttendance(String quarter, String year) {
@@ -182,68 +243,6 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         }
     }
 
-    private static MonthlyAttendance setAttendanceForNewUser(MonthlyAttendance attendance) {
-        MonthlyAttendance monthlyAttendance = new MonthlyAttendance();
-        monthlyAttendance.setId(attendance.getId());
-        monthlyAttendance.setEmailId(attendance.getEmailId());
-        monthlyAttendance.setQuarter(attendance.getQuarter());
-        monthlyAttendance.setYear(attendance.getYear());
-        monthlyAttendance.setMonth(attendance.getMonth());
-        monthlyAttendance.setName(attendance.getName());
-
-        switch (attendance.getAttendance()) {
-            case "Work From Home" -> {
-                monthlyAttendance.setWfh(1);
-                monthlyAttendance.setWfo(0);
-                monthlyAttendance.setWfhFriday(0);
-                monthlyAttendance.setWfoFriday(0);
-                monthlyAttendance.setHolidays(0);
-                monthlyAttendance.setLeaves(0);
-            }
-            case "Work From Office" -> {
-                monthlyAttendance.setWfh(0);
-                monthlyAttendance.setWfo(1);
-                monthlyAttendance.setWfhFriday(0);
-                monthlyAttendance.setWfoFriday(0);
-                monthlyAttendance.setHolidays(0);
-                monthlyAttendance.setLeaves(0);
-            }
-            case "Public Holiday" -> {
-                monthlyAttendance.setWfh(0);
-                monthlyAttendance.setWfo(0);
-                monthlyAttendance.setWfhFriday(0);
-                monthlyAttendance.setWfoFriday(0);
-                monthlyAttendance.setHolidays(1);
-                monthlyAttendance.setLeaves(0);
-            }
-            case "Leave" -> {
-                monthlyAttendance.setWfh(0);
-                monthlyAttendance.setWfo(0);
-                monthlyAttendance.setWfhFriday(0);
-                monthlyAttendance.setWfoFriday(0);
-                monthlyAttendance.setHolidays(0);
-                monthlyAttendance.setLeaves(1);
-            }
-            case "Work From Office - Friday" -> {
-                monthlyAttendance.setWfh(0);
-                monthlyAttendance.setWfo(0);
-                monthlyAttendance.setWfhFriday(0);
-                monthlyAttendance.setWfoFriday(1);
-                monthlyAttendance.setHolidays(0);
-                monthlyAttendance.setLeaves(0);
-            }
-            case "Work From Home - Friday" -> {
-                monthlyAttendance.setWfh(0);
-                monthlyAttendance.setWfo(0);
-                monthlyAttendance.setWfhFriday(1);
-                monthlyAttendance.setWfoFriday(0);
-                monthlyAttendance.setHolidays(0);
-                monthlyAttendance.setLeaves(0);
-            }
-        }
-        return monthlyAttendance;
-    }
-
     @Override
     public MonthlyAttendance getUserMonthlyAttendance(MonthlyAttendance monthlyAttendance) {
         MongoDatabase database = client.getDatabase("digital-GBS");
@@ -341,7 +340,7 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 break;
 
             case "Delete":
-                DeleteResult deleteResult = collection.deleteOne(query);
+                collection.deleteOne(query);
                 return "ApprovalList with the specified emailId and date deleted successfully.";
 
             default:
@@ -407,8 +406,10 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
             switch (attendanceType) {
                 case "Work From Home" -> monthlyAttendance.setWfh(monthlyAttendance.getWfh() + increment);
                 case "Work From Office" -> monthlyAttendance.setWfo(monthlyAttendance.getWfo() + increment);
-                case "Work From Office - Friday" -> monthlyAttendance.setWfoFriday(monthlyAttendance.getWfoFriday() + increment);
-                case "Work From Home - Friday" -> monthlyAttendance.setWfhFriday(monthlyAttendance.getWfhFriday() + increment);
+                case "Work From Office - Friday" ->
+                        monthlyAttendance.setWfoFriday(monthlyAttendance.getWfoFriday() + increment);
+                case "Work From Home - Friday" ->
+                        monthlyAttendance.setWfhFriday(monthlyAttendance.getWfhFriday() + increment);
                 case "Leave" -> monthlyAttendance.setLeaves(monthlyAttendance.getLeaves() + increment);
                 case "Public Holiday" -> monthlyAttendance.setHolidays(monthlyAttendance.getHolidays() + increment);
             }
@@ -416,7 +417,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
             switch (attendanceType) {
                 case "Work From Home" -> qtrAttendance.setWfh(qtrAttendance.getWfh() + increment);
                 case "Work From Office" -> qtrAttendance.setWfo(qtrAttendance.getWfo() + increment);
-                case "Work From Office - Friday" -> qtrAttendance.setWfoFriday(qtrAttendance.getWfoFriday() + increment);
+                case "Work From Office - Friday" ->
+                        qtrAttendance.setWfoFriday(qtrAttendance.getWfoFriday() + increment);
                 case "Work From Home - Friday" -> qtrAttendance.setWfhFriday(qtrAttendance.getWfhFriday() + increment);
                 case "Leave" -> qtrAttendance.setLeaves(qtrAttendance.getLeaves() + increment);
                 case "Public Holiday" -> qtrAttendance.setHolidays(qtrAttendance.getHolidays() + increment);

@@ -1,14 +1,13 @@
 package com.fossil.attendancetracker.controller;
 
-import java.util.List;
-
+import com.fossil.attendancetracker.model.Users;
 import com.fossil.attendancetracker.repository.SearchRepository;
+import com.fossil.attendancetracker.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.fossil.attendancetracker.model.Users;
-import com.fossil.attendancetracker.repository.UsersRepository;
+import java.util.List;
 
 @RestController
 public class UsersController {

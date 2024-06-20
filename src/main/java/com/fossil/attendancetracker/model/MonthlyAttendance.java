@@ -1,7 +1,7 @@
 package com.fossil.attendancetracker.model;
 
-import org.springframework.data.annotation.Id;
 import org.bson.Document;
+import org.springframework.data.annotation.Id;
 
 public class MonthlyAttendance {
 

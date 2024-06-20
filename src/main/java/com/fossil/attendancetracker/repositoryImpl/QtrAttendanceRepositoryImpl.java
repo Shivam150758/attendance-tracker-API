@@ -24,15 +24,73 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
 
     @Autowired
     MongoClient client;
-
+    @Autowired
+    AttendanceRepository attendanceRepo;
+    @Autowired
+    Attendance2Repository attendance2Repository;
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @Autowired
-    AttendanceRepository attendanceRepo;
+    private static QtrAttendance setAttendanceForNewUser(QtrAttendance attendance) {
+        QtrAttendance qtrAttendance = new QtrAttendance();
+        qtrAttendance.setId(attendance.getId());
+        qtrAttendance.setEmailId(attendance.getEmailId());
+        qtrAttendance.setQuarter(attendance.getQuarter());
+        qtrAttendance.setYear(attendance.getYear());
+        qtrAttendance.setName(attendance.getName());
 
-    @Autowired
-    Attendance2Repository attendance2Repository;
+        switch (attendance.getAttendance()) {
+            case "Work From Home" -> {
+                qtrAttendance.setWfh(1);
+                qtrAttendance.setWfo(0);
+                qtrAttendance.setWfhFriday(0);
+                qtrAttendance.setWfoFriday(0);
+                qtrAttendance.setHolidays(0);
+                qtrAttendance.setLeaves(0);
+            }
+            case "Work From Office" -> {
+                qtrAttendance.setWfh(0);
+                qtrAttendance.setWfo(1);
+                qtrAttendance.setWfhFriday(0);
+                qtrAttendance.setWfoFriday(0);
+                qtrAttendance.setHolidays(0);
+                qtrAttendance.setLeaves(0);
+            }
+            case "Public Holiday" -> {
+                qtrAttendance.setWfh(0);
+                qtrAttendance.setWfo(0);
+                qtrAttendance.setWfhFriday(0);
+                qtrAttendance.setWfoFriday(0);
+                qtrAttendance.setHolidays(1);
+                qtrAttendance.setLeaves(0);
+            }
+            case "Leave" -> {
+                qtrAttendance.setWfh(0);
+                qtrAttendance.setWfo(0);
+                qtrAttendance.setWfhFriday(0);
+                qtrAttendance.setWfoFriday(0);
+                qtrAttendance.setHolidays(0);
+                qtrAttendance.setLeaves(1);
+            }
+            case "Work From Office - Friday" -> {
+                qtrAttendance.setWfh(0);
+                qtrAttendance.setWfo(0);
+                qtrAttendance.setWfhFriday(0);
+                qtrAttendance.setWfoFriday(1);
+                qtrAttendance.setHolidays(0);
+                qtrAttendance.setLeaves(0);
+            }
+            case "Work From Home - Friday" -> {
+                qtrAttendance.setWfh(0);
+                qtrAttendance.setWfo(0);
+                qtrAttendance.setWfhFriday(1);
+                qtrAttendance.setWfoFriday(0);
+                qtrAttendance.setHolidays(0);
+                qtrAttendance.setLeaves(0);
+            }
+        }
+        return qtrAttendance;
+    }
 
     @Override
     public ResponseEntity<?> findByUserId(Attendance attendance) {
@@ -134,66 +192,5 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
         query.addCriteria(Criteria.where("emailId").is(emailId).and("quarter").is(quarter).and("year").is(year).and("attendance").is(attendance));
 
         return mongoTemplate.find(query, Attendance.class);
-    }
-
-    private static QtrAttendance setAttendanceForNewUser(QtrAttendance attendance) {
-        QtrAttendance qtrAttendance = new QtrAttendance();
-        qtrAttendance.setId(attendance.getId());
-        qtrAttendance.setEmailId(attendance.getEmailId());
-        qtrAttendance.setQuarter(attendance.getQuarter());
-        qtrAttendance.setYear(attendance.getYear());
-        qtrAttendance.setName(attendance.getName());
-
-        switch (attendance.getAttendance()) {
-            case "Work From Home" -> {
-                qtrAttendance.setWfh(1);
-                qtrAttendance.setWfo(0);
-                qtrAttendance.setWfhFriday(0);
-                qtrAttendance.setWfoFriday(0);
-                qtrAttendance.setHolidays(0);
-                qtrAttendance.setLeaves(0);
-            }
-            case "Work From Office" -> {
-                qtrAttendance.setWfh(0);
-                qtrAttendance.setWfo(1);
-                qtrAttendance.setWfhFriday(0);
-                qtrAttendance.setWfoFriday(0);
-                qtrAttendance.setHolidays(0);
-                qtrAttendance.setLeaves(0);
-            }
-            case "Public Holiday" -> {
-                qtrAttendance.setWfh(0);
-                qtrAttendance.setWfo(0);
-                qtrAttendance.setWfhFriday(0);
-                qtrAttendance.setWfoFriday(0);
-                qtrAttendance.setHolidays(1);
-                qtrAttendance.setLeaves(0);
-            }
-            case "Leave" -> {
-                qtrAttendance.setWfh(0);
-                qtrAttendance.setWfo(0);
-                qtrAttendance.setWfhFriday(0);
-                qtrAttendance.setWfoFriday(0);
-                qtrAttendance.setHolidays(0);
-                qtrAttendance.setLeaves(1);
-            }
-            case "Work From Office - Friday" -> {
-                qtrAttendance.setWfh(0);
-                qtrAttendance.setWfo(0);
-                qtrAttendance.setWfhFriday(0);
-                qtrAttendance.setWfoFriday(1);
-                qtrAttendance.setHolidays(0);
-                qtrAttendance.setLeaves(0);
-            }
-            case "Work From Home - Friday" -> {
-                qtrAttendance.setWfh(0);
-                qtrAttendance.setWfo(0);
-                qtrAttendance.setWfhFriday(1);
-                qtrAttendance.setWfoFriday(0);
-                qtrAttendance.setHolidays(0);
-                qtrAttendance.setLeaves(0);
-            }
-        }
-        return qtrAttendance;
     }
 }

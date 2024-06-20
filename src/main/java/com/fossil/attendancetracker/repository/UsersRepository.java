@@ -1,8 +1,7 @@
 package com.fossil.attendancetracker.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-
 import com.fossil.attendancetracker.model.Users;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
