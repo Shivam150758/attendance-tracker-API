@@ -2,20 +2,24 @@ name: Run Azure Login without subscription
 
 on: [push]
 
+permissions:
+  id-token: write # Necessary for Azure OIDC login
+  contents: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4 # Updated to use Node.js 20
 
     - name: Azure Login
       uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} # Needed for the login action
         allow-no-subscriptions: true
         enable-AzPSSession: true
 
