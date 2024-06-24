@@ -48,14 +48,13 @@ jobs:
           name: java-app
 
       - name: Set AZURE_HTTP_USER_AGENT environment variable
-        run: |
-          echo "AZURE_HTTP_USER_AGENT=GITHUBACTIONS_DeployWebAppToAzure_259fe3f8e70eb42eecffaedfea06d32773023d0eeb5a2325f73225348285c1ec" >> $GITHUB_ENV
+        run: echo "AZURE_HTTP_USER_AGENT=GITHUBACTIONS_DeployWebAppToAzure_259fe3f8e70eb42eecffaedfea06d32773023d0eeb5a2325f73225348285c1ec" >> $GITHUB_ENV
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2.1.0
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'digital-attendance-tool'
           slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9771DF1163C04E6F944ADFB615DB20C7 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
