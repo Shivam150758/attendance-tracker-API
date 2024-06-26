@@ -10,6 +10,8 @@ public interface DateWiseRepository {
 
     ResponseEntity<?> findByUserId(Attendance attendance);
 
+    ResponseEntity<?> findAttendanceById(Attendance attendance);
+
     ResponseEntity<?> addUserAttendance(QtrAttendance attendance);
 
     QtrAttendance getUserAttendance(QtrAttendance qtrAttendance);

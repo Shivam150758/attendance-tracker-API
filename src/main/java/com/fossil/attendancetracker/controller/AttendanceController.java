@@ -8,14 +8,12 @@ import com.fossil.attendancetracker.repository.AttendanceRepository;
 import com.fossil.attendancetracker.repository.DateWiseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = {"https://attendance-tracker-gbs.azurewebsites.net", "http://localhost:4200"})
 public class AttendanceController {
 
     @Autowired
@@ -65,5 +63,10 @@ public class AttendanceController {
     @PostMapping(value = "/attendanceCategory")
     public List<Attendance> getAttendanceCategory(@RequestBody Attendance attendance) {
         return dateWiseRepository.findByAttendanceType(attendance.getEmailId(), attendance.getQuarter(), attendance.getYear(), attendance.getAttendance());
+    }
+
+    @PostMapping(value = "/checkAttendance")
+    public ResponseEntity<?> findAttendanceById(@RequestBody Attendance attendance) {
+        return dateWiseRepository.findAttendanceById(attendance);
     }
 }

@@ -19,13 +19,6 @@ public class Users {
     private String managerId;
     private Date lastLogin;
 
-    public Users(String name, String emailId, String password, String department, String subDep, String team) {
-        super();
-        this.name = name;
-        this.emailId = emailId;
-        this.password = password;
-    }
-
     public Users() {
     }
 

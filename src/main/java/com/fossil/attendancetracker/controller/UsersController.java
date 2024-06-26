@@ -4,13 +4,19 @@ import com.fossil.attendancetracker.model.Users;
 import com.fossil.attendancetracker.repository.SearchRepository;
 import com.fossil.attendancetracker.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = {"https://attendance-tracker-gbs.azurewebsites.net", "http://localhost:4200"})
 public class UsersController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
     @Autowired
     UsersRepository usersRepo;
@@ -55,7 +61,17 @@ public class UsersController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<?> checkUserLogin(@RequestBody Users cred) {
-        return searchRepo.checkUserCred(cred);
+        try {
+            logger.info("Login request received: {}", cred);
+            if (cred.getEmailId() == null || cred.getPassword() == null) {
+                logger.error("Username or password is missing");
+                return new ResponseEntity<>("Username or password is missing", HttpStatus.BAD_REQUEST);
+            }
+            return searchRepo.checkUserCred(cred);
+        } catch (Exception e) {
+            logger.error("An error occurred during login", e);
+            return new ResponseEntity<>("An error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/subordinates")

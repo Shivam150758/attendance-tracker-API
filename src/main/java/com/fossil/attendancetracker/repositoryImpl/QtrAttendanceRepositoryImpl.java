@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
@@ -90,6 +91,20 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
             }
         }
         return qtrAttendance;
+    }
+
+    @Override
+    public ResponseEntity<?> findAttendanceById(Attendance attendance) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("attendance");
+        Document query = new Document("_id", attendance.getId());
+        Document found = collection.find(query).first();
+
+        if (found != null) {
+            return ResponseEntity.ok(Map.of("status", "Exist"));
+        } else {
+            return ResponseEntity.ok(Map.of("status", "Not Exist"));
+        }
     }
 
     @Override
