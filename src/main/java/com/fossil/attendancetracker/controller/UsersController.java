@@ -13,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = {"https://attendance-tracker-gbs.azurewebsites.net", "http://localhost:4200"})
+@CrossOrigin(origins = {
+        "https://attendance-tracker-gbs.azurewebsites.net",
+        "http://localhost:4200"
+})
 public class UsersController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
