@@ -6,6 +6,7 @@ import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
 import com.fossil.attendancetracker.repository.AdminMethodsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -63,5 +64,10 @@ public class AdminController {
     @PostMapping(value = "/updateAttendance")
     public String updateAttendance(@RequestBody ApprovalList approvalList) {
         return adminMethodsRepository.updateAttendanceData(approvalList);
+    }
+
+    @PostMapping(value = "/monthlyAllowanceData")
+    public ResponseEntity<?> monthlyShiftAllowance(@RequestBody MonthlyAttendance monthlyAttendance) {
+        return adminMethodsRepository.monthlyShiftAllowance(monthlyAttendance.getYear(), monthlyAttendance.getQuarter());
     }
 }

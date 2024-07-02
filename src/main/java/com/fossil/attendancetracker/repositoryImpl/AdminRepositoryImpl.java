@@ -18,10 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -47,6 +44,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         monthlyAttendance.setYear(attendance.getYear());
         monthlyAttendance.setMonth(attendance.getMonth());
         monthlyAttendance.setName(attendance.getName());
+        int allowance = attendance.getAllowance();
+        int foodAllowance = attendance.getFoodAllowance();
 
         switch (attendance.getAttendance()) {
             case "Work From Home" -> {
@@ -56,6 +55,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 monthlyAttendance.setWfoFriday(0);
                 monthlyAttendance.setHolidays(0);
                 monthlyAttendance.setLeaves(0);
+                monthlyAttendance.setAllowance(allowance);
+                monthlyAttendance.setFoodAllowance(foodAllowance);
             }
             case "Work From Office" -> {
                 monthlyAttendance.setWfh(0);
@@ -64,6 +65,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 monthlyAttendance.setWfoFriday(0);
                 monthlyAttendance.setHolidays(0);
                 monthlyAttendance.setLeaves(0);
+                monthlyAttendance.setAllowance(allowance);
+                monthlyAttendance.setFoodAllowance(foodAllowance);
             }
             case "Public Holiday" -> {
                 monthlyAttendance.setWfh(0);
@@ -72,6 +75,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 monthlyAttendance.setWfoFriday(0);
                 monthlyAttendance.setHolidays(1);
                 monthlyAttendance.setLeaves(0);
+                monthlyAttendance.setAllowance(0);
+                monthlyAttendance.setFoodAllowance(0);
             }
             case "Leave" -> {
                 monthlyAttendance.setWfh(0);
@@ -80,6 +85,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 monthlyAttendance.setWfoFriday(0);
                 monthlyAttendance.setHolidays(0);
                 monthlyAttendance.setLeaves(1);
+                monthlyAttendance.setAllowance(0);
+                monthlyAttendance.setFoodAllowance(0);
             }
             case "Work From Office - Friday" -> {
                 monthlyAttendance.setWfh(0);
@@ -88,6 +95,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 monthlyAttendance.setWfoFriday(1);
                 monthlyAttendance.setHolidays(0);
                 monthlyAttendance.setLeaves(0);
+                monthlyAttendance.setAllowance(allowance);
+                monthlyAttendance.setFoodAllowance(foodAllowance);
             }
             case "Work From Home - Friday" -> {
                 monthlyAttendance.setWfh(0);
@@ -96,6 +105,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 monthlyAttendance.setWfoFriday(0);
                 monthlyAttendance.setHolidays(0);
                 monthlyAttendance.setLeaves(0);
+                monthlyAttendance.setAllowance(allowance);
+                monthlyAttendance.setFoodAllowance(foodAllowance);
             }
         }
         return monthlyAttendance;
@@ -158,6 +169,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 attendance.setWfhFriday(doc.getInteger("wfhFriday"));
                 attendance.setLeaves(doc.getInteger("leaves"));
                 attendance.setHolidays(doc.getInteger("holidays"));
+                attendance.setAllowance(doc.getInteger("allowance"));
+                attendance.setFoodAllowance(doc.getInteger("foodAllowance"));
                 attendanceList.add(attendance);
             }
         }
@@ -197,42 +210,71 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
 
         if (found != null) {
             String input = attendance.getAttendance();
+            int foodAllowance = attendance.getFoodAllowance();
+            int allowance = attendance.getAllowance();
+
             switch (input) {
                 case "Work From Home - Friday" -> {
                     int newWfhCount = found.getInteger("wfhFriday", 0) + 1;
-                    Document update = new Document("$set", new Document("wfhFriday", newWfhCount));
+                    int newFoodAllowance = found.getInteger("foodAllowance") + foodAllowance;
+                    int newAllowance = found.getInteger("allowance") + allowance;
+                    Document update = new Document("$set", new Document("wfhFriday", newWfhCount)
+                            .append("foodAllowance", newFoodAllowance)
+                            .append("allowance", newAllowance));
                     collection2.updateOne(query, update);
-                    found.put("wfh", newWfhCount);
+                    found.put("wfhFriday", newWfhCount);
+                    found.put("foodAllowance", newFoodAllowance);
+                    found.put("allowance", newAllowance);
                 }
                 case "Work From Office - Friday" -> {
-                    int newWfhCount = found.getInteger("wfoFriday", 0) + 1;
-                    Document update = new Document("$set", new Document("wfoFriday", newWfhCount));
+                    int newWfoCount = found.getInteger("wfoFriday", 0) + 1;
+                    int newFoodAllowance = found.getInteger("foodAllowance") + foodAllowance;
+                    int newAllowance = found.getInteger("allowance") + allowance;
+                    Document update = new Document("$set", new Document("wfoFriday", newWfoCount)
+                            .append("foodAllowance", newFoodAllowance)
+                            .append("allowance", newAllowance));
                     collection2.updateOne(query, update);
-                    found.put("wfh", newWfhCount);
+                    found.put("wfoFriday", newWfoCount);
+                    found.put("foodAllowance", newFoodAllowance);
+                    found.put("allowance", newAllowance);
                 }
                 case "Leave" -> {
-                    int newWfhCount = found.getInteger("leaves", 0) + 1;
-                    Document update = new Document("$set", new Document("leaves", newWfhCount));
+                    int newLeaveCount = found.getInteger("leaves", 0) + 1;
+                    Document update = new Document("$set", new Document("leaves", newLeaveCount));
                     collection2.updateOne(query, update);
-                    found.put("wfh", newWfhCount);
+                    found.put("leaves", newLeaveCount);
+                    return ResponseEntity.ok(HttpStatus.ACCEPTED);
                 }
                 case "Public Holiday" -> {
-                    int newWfhCount = found.getInteger("holidays", 0) + 1;
-                    Document update = new Document("$set", new Document("holidays", newWfhCount));
+                    int newHolidayCount = found.getInteger("holidays", 0) + 1;
+                    Document update = new Document("$set", new Document("holidays", newHolidayCount));
                     collection2.updateOne(query, update);
-                    found.put("wfh", newWfhCount);
+                    found.put("holidays", newHolidayCount);
+                    return ResponseEntity.ok(HttpStatus.ACCEPTED);
                 }
                 case "Work From Office" -> {
-                    int newWfhCount = found.getInteger("wfo", 0) + 1;
-                    Document update = new Document("$set", new Document("wfo", newWfhCount));
+                    int newWfoCount = found.getInteger("wfo", 0) + 1;
+                    int newFoodAllowance = found.getInteger("foodAllowance") + foodAllowance;
+                    int newAllowance = found.getInteger("allowance") + allowance;
+                    Document update = new Document("$set", new Document("wfo", newWfoCount)
+                            .append("foodAllowance", newFoodAllowance)
+                            .append("allowance", newAllowance));
                     collection2.updateOne(query, update);
-                    found.put("wfh", newWfhCount);
+                    found.put("wfo", newWfoCount);
+                    found.put("foodAllowance", newFoodAllowance);
+                    found.put("allowance", newAllowance);
                 }
                 case "Work From Home" -> {
                     int newWfhCount = found.getInteger("wfh", 0) + 1;
-                    Document update = new Document("$set", new Document("wfh", newWfhCount));
+                    int newFoodAllowance = found.getInteger("foodAllowance") + foodAllowance;
+                    int newAllowance = found.getInteger("allowance") + allowance;
+                    Document update = new Document("$set", new Document("wfh", newWfhCount)
+                            .append("foodAllowance", newFoodAllowance)
+                            .append("allowance", newAllowance));
                     collection2.updateOne(query, update);
                     found.put("wfh", newWfhCount);
+                    found.put("foodAllowance", newFoodAllowance);
+                    found.put("allowance", newAllowance);
                 }
             }
             return ResponseEntity.ok(HttpStatus.ACCEPTED);
@@ -356,7 +398,49 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
 
     private void updateAttendance(ApprovalList approvalList) {
         String idAttendance = approvalList.getRaisedBy() + approvalList.getDate();
+        String prevShift = approvalList.getPrevShift();
+        String prevAttendance = approvalList.getPrevAttendance();
+        String newShift = approvalList.getNewShift();
         Attendance attendance = attendanceRepository.findById(idAttendance).orElse(new Attendance());
+
+        Map<String, Integer> shiftAllowanceMap = Map.of(
+                "Shift A", 0,
+                "Shift B", 150,
+                "Shift C", 250,
+                "Shift D", 350,
+                "Shift F", 250
+        );
+
+        Map<String, Integer> shiftFoodAllowanceMap = Map.of(
+                "Shift A", 0,
+                "Shift B", 100,
+                "Shift C", 100,
+                "Shift D", 100,
+                "Shift F", 0
+        );
+
+        if (prevShift != null && !prevShift.isEmpty()) {
+            int prevAllowance;
+            int prevFoodAllowance;
+            if (prevAttendance.isEmpty()) {
+                prevAllowance = 0;
+                prevFoodAllowance = 0;
+            } else {
+                prevAllowance = shiftAllowanceMap.getOrDefault(prevShift, 0);
+                prevFoodAllowance = shiftFoodAllowanceMap.getOrDefault(prevShift, 0);
+            }
+            attendance.setAllowance(attendance.getAllowance() - prevAllowance);
+            attendance.setFoodAllowance(attendance.getFoodAllowance() - prevFoodAllowance);
+        }
+
+        if (newShift != null && !newShift.isEmpty()) {
+            int newAllowance;
+            int newFoodAllowance;
+            newAllowance = shiftAllowanceMap.getOrDefault(newShift, 0);
+            newFoodAllowance = shiftFoodAllowanceMap.getOrDefault(newShift, 0);
+            attendance.setAllowance(attendance.getAllowance() + newAllowance);
+            attendance.setFoodAllowance(attendance.getFoodAllowance() + newFoodAllowance);
+        }
         attendance.setId(idAttendance);
         attendance.setEmailId(approvalList.getRaisedBy());
         attendance.setDate(approvalList.getDate());
@@ -380,9 +464,51 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         monthlyAttendance.setQuarter(approvalList.getQuarter());
         monthlyAttendance.setMonth(approvalList.getMonth());
 
+        String prevShift = approvalList.getPrevShift();
+        String prevAttendance = approvalList.getPrevAttendance();
+        String newShift = approvalList.getNewShift();
+
+        Map<String, Integer> shiftAllowanceMap = Map.of(
+                "Shift A", 0,
+                "Shift B", 150,
+                "Shift C", 250,
+                "Shift D", 350,
+                "Shift F", 250
+        );
+
+        Map<String, Integer> shiftFoodAllowanceMap = Map.of(
+                "Shift A", 0,
+                "Shift B", 100,
+                "Shift C", 100,
+                "Shift D", 100,
+                "Shift F", 0
+        );
+
+        if (prevShift != null && !prevShift.isEmpty()) {
+            int prevAllowance;
+            int prevFoodAllowance;
+            if (prevAttendance.isEmpty()) {
+                prevAllowance = 0;
+                prevFoodAllowance = 0;
+            } else {
+                prevAllowance = shiftAllowanceMap.getOrDefault(prevShift, 0);
+                prevFoodAllowance = shiftFoodAllowanceMap.getOrDefault(prevShift, 0);
+            }
+            monthlyAttendance.setAllowance(monthlyAttendance.getAllowance() - prevAllowance);
+            monthlyAttendance.setFoodAllowance(monthlyAttendance.getFoodAllowance() - prevFoodAllowance);
+        }
+
+        if (newShift != null && !newShift.isEmpty()) {
+            int newAllowance;
+            int newFoodAllowance;
+            newAllowance = shiftAllowanceMap.getOrDefault(newShift, 0);
+            newFoodAllowance = shiftFoodAllowanceMap.getOrDefault(newShift, 0);
+            monthlyAttendance.setAllowance(monthlyAttendance.getAllowance() + newAllowance);
+            monthlyAttendance.setFoodAllowance(monthlyAttendance.getFoodAllowance() + newFoodAllowance);
+        }
+
         adjustAttendanceCounts(monthlyAttendance, approvalList.getNewAttendance(), 1);
         adjustAttendanceCounts(monthlyAttendance, approvalList.getPrevAttendance(), -1);
-
         monthlyAttendanceRepository.save(monthlyAttendance);
     }
 
@@ -424,5 +550,23 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 case "Public Holiday" -> qtrAttendance.setHolidays(qtrAttendance.getHolidays() + increment);
             }
         }
+    }
+
+    @Override
+    public ResponseEntity<?> monthlyShiftAllowance(String year, String qtr) {
+        List<String> months = getMonthsForQuarter(qtr);
+//        List<MonthlyAttendance> allowances = monthlyAttendanceRepository.findByYearAndQuarterAndMonthIn(year, months);
+//        return ResponseEntity.ok(allowances);
+        return null;
+    }
+
+    private List<String> getMonthsForQuarter(String qtr) {
+        return switch (qtr) {
+            case "Q1" -> Arrays.asList("1", "2", "3");
+            case "Q2" -> Arrays.asList("4", "5", "6");
+            case "Q3" -> Arrays.asList("7", "8", "9");
+            case "Q4" -> Arrays.asList("10", "11", "12");
+            default -> throw new IllegalArgumentException("Invalid quarter: " + qtr);
+        };
     }
 }

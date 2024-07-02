@@ -20,6 +20,8 @@ public class MonthlyAttendance {
     private int wfoFriday;
     private int leaves;
     private int holidays;
+    private int allowance;
+    private int foodAllowance;
     private String attendance;
 
     public MonthlyAttendance() {
@@ -155,5 +157,21 @@ public class MonthlyAttendance {
 
     public void setAttendance(String attendance) {
         this.attendance = attendance;
+    }
+
+    public int getAllowance() {
+        return allowance;
+    }
+
+    public void setAllowance(int allowance) {
+        this.allowance = allowance;
+    }
+
+    public int getFoodAllowance() {
+        return foodAllowance;
+    }
+
+    public void setFoodAllowance(int foodAllowance) {
+        this.foodAllowance = foodAllowance;
     }
 }

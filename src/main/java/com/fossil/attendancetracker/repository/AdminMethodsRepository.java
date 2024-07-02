@@ -28,4 +28,6 @@ public interface AdminMethodsRepository {
     String saveApprovalList(ApprovalList approvalList);
 
     String updateAttendanceData(ApprovalList approvalList);
+
+    ResponseEntity<?> monthlyShiftAllowance(String Year, String Qtr);
 }

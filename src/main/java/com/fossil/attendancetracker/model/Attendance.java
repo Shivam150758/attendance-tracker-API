@@ -15,6 +15,8 @@ public class Attendance {
     private String quarter;
     private String month;
     private String shift;
+    private int allowance;
+    private int foodAllowance;
     private String lastUpdatedBy;
     private String lastUpdatedOn;
 
@@ -99,5 +101,21 @@ public class Attendance {
 
     public void setShift(String shift) {
         this.shift = shift;
+    }
+
+    public int getAllowance() {
+        return allowance;
+    }
+
+    public void setAllowance(int allowance) {
+        this.allowance = allowance;
+    }
+
+    public int getFoodAllowance() {
+        return foodAllowance;
+    }
+
+    public void setFoodAllowance(int foodAllowance) {
+        this.foodAllowance = foodAllowance;
     }
 }
