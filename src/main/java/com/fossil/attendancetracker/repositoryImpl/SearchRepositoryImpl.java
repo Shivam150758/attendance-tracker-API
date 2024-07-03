@@ -48,6 +48,11 @@ public class SearchRepositoryImpl implements SearchRepository {
         authenticatedUser.setShift(user.getShift());
         authenticatedUser.setPassword(user.getPassword());
         authenticatedUser.setManagerId(user.getManagerId());
+        authenticatedUser.setEmpId(user.getEmpId());
+        authenticatedUser.setRegion(user.getRegion());
+        authenticatedUser.setSapId(user.getSapId());
+        authenticatedUser.setManagerName(user.getManagerName());
+        authenticatedUser.setWorkLocation(user.getWorkLocation());
         authenticatedUser.setLastLogin(new Date());
         return authenticatedUser;
     }
@@ -149,6 +154,11 @@ public class SearchRepositoryImpl implements SearchRepository {
                 authenticatedUser.setPassword(found.getString("password"));
                 authenticatedUser.setManagerId(found.getString("managerId"));
                 authenticatedUser.setShift(found.getString("shift"));
+                authenticatedUser.setEmpId(found.getString("empId"));
+                authenticatedUser.setRegion(found.getString("region"));
+                authenticatedUser.setSapId(found.getString("sapId"));
+                authenticatedUser.setManagerName(found.getString("managerName"));
+                authenticatedUser.setWorkLocation(found.getString("workLocation"));
                 authenticatedUser.setLastLogin(new Date());
 
                 return ResponseEntity.ok(authenticatedUser);

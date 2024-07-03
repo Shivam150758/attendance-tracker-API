@@ -299,6 +299,18 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
     }
 
     @Override
+    public List<MonthlyAttendance> getUserMonthlyAttendanceQtr(MonthlyAttendance monthlyAttendance) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection2 = database.getCollection("monthlyAttendance");
+
+        String year = monthlyAttendance.getYear();
+        String quarter = monthlyAttendance.getQuarter();
+        String emailId = monthlyAttendance.getEmailId();
+
+        return monthlyAttendanceRepository.findByYearAndQuarterAndEmailId(year, quarter, emailId);
+    }
+
+    @Override
     public ApprovalList getApprovalList(String raisedBy, String raisedTo) {
         MongoDatabase database = client.getDatabase("digital-GBS");
         MongoCollection<Document> collection = database.getCollection("approvalList");
@@ -404,6 +416,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         Attendance attendance = attendanceRepository.findById(idAttendance).orElse(new Attendance());
 
         Map<String, Integer> shiftAllowanceMap = Map.of(
+                "Holiday", 0,
+                "Absent", 0,
                 "Shift A", 0,
                 "Shift B", 150,
                 "Shift C", 250,
@@ -412,6 +426,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         );
 
         Map<String, Integer> shiftFoodAllowanceMap = Map.of(
+                "Holiday", 0,
+                "Absent", 0,
                 "Shift A", 0,
                 "Shift B", 100,
                 "Shift C", 100,
@@ -469,6 +485,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         String newShift = approvalList.getNewShift();
 
         Map<String, Integer> shiftAllowanceMap = Map.of(
+                "Holiday", 0,
+                "Absent", 0,
                 "Shift A", 0,
                 "Shift B", 150,
                 "Shift C", 250,
@@ -477,6 +495,8 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
         );
 
         Map<String, Integer> shiftFoodAllowanceMap = Map.of(
+                "Holiday", 0,
+                "Absent", 0,
                 "Shift A", 0,
                 "Shift B", 100,
                 "Shift C", 100,
@@ -550,23 +570,5 @@ public class AdminRepositoryImpl implements AdminMethodsRepository {
                 case "Public Holiday" -> qtrAttendance.setHolidays(qtrAttendance.getHolidays() + increment);
             }
         }
-    }
-
-    @Override
-    public ResponseEntity<?> monthlyShiftAllowance(String year, String qtr) {
-        List<String> months = getMonthsForQuarter(qtr);
-//        List<MonthlyAttendance> allowances = monthlyAttendanceRepository.findByYearAndQuarterAndMonthIn(year, months);
-//        return ResponseEntity.ok(allowances);
-        return null;
-    }
-
-    private List<String> getMonthsForQuarter(String qtr) {
-        return switch (qtr) {
-            case "Q1" -> Arrays.asList("1", "2", "3");
-            case "Q2" -> Arrays.asList("4", "5", "6");
-            case "Q3" -> Arrays.asList("7", "8", "9");
-            case "Q4" -> Arrays.asList("10", "11", "12");
-            default -> throw new IllegalArgumentException("Invalid quarter: " + qtr);
-        };
     }
 }

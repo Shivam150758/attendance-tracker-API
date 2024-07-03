@@ -13,6 +13,11 @@ public class Users {
 
     private String emailId;
     private String name;
+    private String sapId;
+    private String empId;
+    private String region;
+    private String managerName;
+    private String workLocation;
     private String password;
     private String team;
     private String shift;
@@ -84,5 +89,45 @@ public class Users {
 
     public void setShift(String shift) {
         this.shift = shift;
+    }
+
+    public String getSapId() {
+        return sapId;
+    }
+
+    public void setSapId(String sapId) {
+        this.sapId = sapId;
+    }
+
+    public String getEmpId() {
+        return empId;
+    }
+
+    public void setEmpId(String empId) {
+        this.empId = empId;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getManagerName() {
+        return managerName;
+    }
+
+    public void setManagerName(String managerName) {
+        this.managerName = managerName;
+    }
+
+    public String getWorkLocation() {
+        return workLocation;
+    }
+
+    public void setWorkLocation(String workLocation) {
+        this.workLocation = workLocation;
     }
 }

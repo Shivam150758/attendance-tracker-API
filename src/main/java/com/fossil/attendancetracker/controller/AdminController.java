@@ -66,8 +66,8 @@ public class AdminController {
         return adminMethodsRepository.updateAttendanceData(approvalList);
     }
 
-    @PostMapping(value = "/monthlyAllowanceData")
-    public ResponseEntity<?> monthlyShiftAllowance(@RequestBody MonthlyAttendance monthlyAttendance) {
-        return adminMethodsRepository.monthlyShiftAllowance(monthlyAttendance.getYear(), monthlyAttendance.getQuarter());
+    @PostMapping(value = "/userAllowance")
+    public List<MonthlyAttendance> getUserMonthlyAttendanceQtr(@RequestBody MonthlyAttendance monthlyAttendance) {
+        return adminMethodsRepository.getUserMonthlyAttendanceQtr(monthlyAttendance);
     }
 }

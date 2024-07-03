@@ -23,11 +23,11 @@ public interface AdminMethodsRepository {
 
     MonthlyAttendance getUserMonthlyAttendance(MonthlyAttendance monthlyAttendance);
 
+    List<MonthlyAttendance> getUserMonthlyAttendanceQtr(MonthlyAttendance monthlyAttendance);
+
     ApprovalList getApprovalList(String raisedBy, String raisedTo);
 
     String saveApprovalList(ApprovalList approvalList);
 
     String updateAttendanceData(ApprovalList approvalList);
-
-    ResponseEntity<?> monthlyShiftAllowance(String Year, String Qtr);
 }

@@ -183,9 +183,9 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
         MongoCollection<Document> collection2 = database.getCollection("qtrAttendance");
         Document query = new Document("_id", qtrAttendance.getId());
         Document found = collection2.find(query).first();
+        QtrAttendance att = new QtrAttendance();
 
         if (found != null) {
-            QtrAttendance att = new QtrAttendance();
             att.setYear(found.getString("year"));
             att.setQtr(found.getString("quarter"));
             att.setName(found.getString("name"));
@@ -195,10 +195,8 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
             att.setWfhFriday(found.getInteger("wfhFriday"));
             att.setLeaves(found.getInteger("leaves"));
             att.setHolidays(found.getInteger("holidays"));
-            return att;
-        } else {
-            return null;
         }
+        return att;
     }
 
     @Override
