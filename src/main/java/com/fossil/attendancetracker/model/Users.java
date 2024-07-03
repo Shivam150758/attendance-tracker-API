@@ -21,6 +21,7 @@ public class Users {
     private String password;
     private String team;
     private String shift;
+    private boolean admin;
     private String managerId;
     private Date lastLogin;
 
@@ -129,5 +130,13 @@ public class Users {
 
     public void setWorkLocation(String workLocation) {
         this.workLocation = workLocation;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

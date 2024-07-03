@@ -53,6 +53,7 @@ public class SearchRepositoryImpl implements SearchRepository {
         authenticatedUser.setSapId(user.getSapId());
         authenticatedUser.setManagerName(user.getManagerName());
         authenticatedUser.setWorkLocation(user.getWorkLocation());
+        authenticatedUser.setAdmin(user.isAdmin());
         authenticatedUser.setLastLogin(new Date());
         return authenticatedUser;
     }
@@ -157,6 +158,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                 authenticatedUser.setEmpId(found.getString("empId"));
                 authenticatedUser.setRegion(found.getString("region"));
                 authenticatedUser.setSapId(found.getString("sapId"));
+                authenticatedUser.setAdmin(found.getBoolean("admin"));
                 authenticatedUser.setManagerName(found.getString("managerName"));
                 authenticatedUser.setWorkLocation(found.getString("workLocation"));
                 authenticatedUser.setLastLogin(new Date());
