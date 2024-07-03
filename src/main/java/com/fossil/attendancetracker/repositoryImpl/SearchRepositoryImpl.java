@@ -19,9 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -174,15 +172,21 @@ public class SearchRepositoryImpl implements SearchRepository {
 
     @Override
     public List<Users> getSubordinates(Users manager) {
-        List<Users> subordinates = usersRepo.findByManagerId(manager.getEmailId());
-        List<Users> allSubordinates = new ArrayList<>(subordinates);
+        List<Users> allSubordinates = new ArrayList<>();
 
-        for (Users subordinate : subordinates) {
-            List<Users> nestedSubordinates = getSubordinates(subordinate);
-            allSubordinates.addAll(nestedSubordinates);
+        List<Users> directSubordinates = usersRepo.findByManagerId(manager.getEmailId());
+        Queue<Users> queue = new LinkedList<>(directSubordinates);
+
+        while (!queue.isEmpty()) {
+            Users current = queue.poll();
+            allSubordinates.add(current);
+
+            List<Users> nestedSubordinates = usersRepo.findByManagerId(current.getEmailId());
+            queue.addAll(nestedSubordinates);
         }
         return allSubordinates;
     }
+
 
     @Override
     public Users resetUsersPassword(Users user) {
