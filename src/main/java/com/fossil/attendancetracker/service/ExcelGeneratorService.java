@@ -19,15 +19,6 @@ public class ExcelGeneratorService {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Attendance");
 
-            // Header
-//            Row headerRow = sheet.createRow(0);
-//            String[] columns = {"Emp ID", "SAP ID", "Emp Name", "Region", "Manager", "Work Location", "Shift"};
-//            for (int i = 0; i < columns.length; i++) {
-//                Cell cell = headerRow.createCell(i);
-//                cell.setCellValue(columns[i]);
-//                cell.setCellStyle(createHeaderCellStyle(workbook));
-//            }
-
             // Dates row
             Row dateRow = sheet.createRow(0);
             Row dayRow = sheet.createRow(1);
