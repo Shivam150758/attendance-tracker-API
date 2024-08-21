@@ -65,14 +65,11 @@ public class UsersController {
     @PostMapping(value = "/login")
     public ResponseEntity<?> checkUserLogin(@RequestBody Users cred) {
         try {
-            logger.info("Login request received: {}", cred);
             if (cred.getEmailId() == null || cred.getPassword() == null) {
-                logger.error("Username or password is missing");
                 return new ResponseEntity<>("Username or password is missing", HttpStatus.BAD_REQUEST);
             }
             return searchRepo.checkUserCred(cred);
         } catch (Exception e) {
-            logger.error("An error occurred during login", e);
             return new ResponseEntity<>("An error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -85,5 +82,15 @@ public class UsersController {
     @PostMapping("/resetPassword")
     public Users resetUserPassword(@RequestBody Users user) {
         return searchRepo.resetUsersPassword(user);
+    }
+
+    @PostMapping("/getLeaves")
+    public double getUserLeave(@RequestBody Users user) {
+        return searchRepo.getUserLeave(user);
+    }
+
+    @PostMapping("/updateLeaves")
+    public double updateUserLeave(@RequestBody Users user) {
+        return searchRepo.updateUserLeave(user);
     }
 }

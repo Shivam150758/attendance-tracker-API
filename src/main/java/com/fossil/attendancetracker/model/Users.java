@@ -23,6 +23,7 @@ public class Users {
     private String shift;
     private boolean admin;
     private String managerId;
+    private double leave;
     private Date lastLogin;
 
     public Users() {
@@ -138,5 +139,13 @@ public class Users {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public double getLeave() {
+        return leave;
+    }
+
+    public void setLeave(double leave) {
+        this.leave = leave;
     }
 }

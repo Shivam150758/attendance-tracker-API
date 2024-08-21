@@ -52,6 +52,7 @@ public class SearchRepositoryImpl implements SearchRepository {
         authenticatedUser.setManagerName(user.getManagerName());
         authenticatedUser.setWorkLocation(user.getWorkLocation());
         authenticatedUser.setAdmin(user.isAdmin());
+        authenticatedUser.setLeave(user.getLeave());
         authenticatedUser.setLastLogin(new Date());
         return authenticatedUser;
     }
@@ -159,6 +160,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                 authenticatedUser.setAdmin(found.getBoolean("admin"));
                 authenticatedUser.setManagerName(found.getString("managerName"));
                 authenticatedUser.setWorkLocation(found.getString("workLocation"));
+                authenticatedUser.setLeave(found.getDouble("leave"));
                 authenticatedUser.setLastLogin(new Date());
 
                 return ResponseEntity.ok(authenticatedUser);
@@ -187,7 +189,6 @@ public class SearchRepositoryImpl implements SearchRepository {
         return allSubordinates;
     }
 
-
     @Override
     public Users resetUsersPassword(Users user) {
         MongoDatabase database = client.getDatabase("digital-GBS");
@@ -197,4 +198,36 @@ public class SearchRepositoryImpl implements SearchRepository {
 
         return user;
     }
+    
+    @Override
+    public double getUserLeave(Users user) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("users");
+
+        Document found = collection.find(eq("emailId", user.getEmailId())).first();
+
+        if (found == null) {
+            return 0;
+        } else {
+            return found.getDouble("leave");
+        }
+    }
+
+    @Override
+    public double updateUserLeave(Users user) {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("users");
+
+        Document found = collection.find(eq("emailId", user.getEmailId())).first();
+
+        if (found == null) {
+            return 0;
+        } else {
+            double currentLeave = found.getDouble("leave");
+            double updatedLeave = currentLeave - 1;
+            collection.updateOne(eq("emailId", user.getEmailId()), new Document("$set", new Document("leave", updatedLeave)));
+            return 1;
+        }
+    }
+
 }

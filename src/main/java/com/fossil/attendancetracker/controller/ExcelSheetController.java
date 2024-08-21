@@ -1,8 +1,11 @@
 package com.fossil.attendancetracker.controller;
 
 import com.fossil.attendancetracker.model.Attendance;
+import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.Users;
+import com.fossil.attendancetracker.repository.AdminMethodsRepository;
 import com.fossil.attendancetracker.repository.AttendanceRepository;
+import com.fossil.attendancetracker.repository.SearchRepository;
 import com.fossil.attendancetracker.repository.UsersRepository;
 import com.fossil.attendancetracker.service.ExcelGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +35,21 @@ public class ExcelSheetController {
     private AttendanceRepository attendanceRepository;
 
     @Autowired
+    private AdminMethodsRepository adminMethodsRepository;
+
+    @Autowired
     private ExcelGeneratorService excelGeneratorService;
 
-    @GetMapping("/download/excel")
-    public ResponseEntity<InputStreamResource> downloadExcel(@RequestParam int year, @RequestParam int month) {
-        List<Users> users = usersRepository.findAll();
-        List<Attendance> attendances = attendanceRepository.findAll();
+    @Autowired
+    private SearchRepository searchRepository;
 
-        ByteArrayInputStream in = excelGeneratorService.generateExcel(users, attendances, year, month);
+    @GetMapping("/download/excel")
+    public ResponseEntity<InputStreamResource> downloadExcel(@RequestParam int year, @RequestParam int month, @RequestParam Users user) {
+        List<Users> users = searchRepository.getSubordinates(user);
+        List<Attendance> attendances = attendanceRepository.findAll();
+        List<MonthlyAttendance> monthlyAttendances = adminMethodsRepository.getAllUserMthAttendance(String.valueOf(month), String.valueOf(year));
+
+        ByteArrayInputStream in = excelGeneratorService.generateExcel(users, attendances, year, month, monthlyAttendances);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=attendance.xlsx");

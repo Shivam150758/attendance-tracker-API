@@ -1,5 +1,6 @@
 package com.fossil.attendancetracker.repositoryImpl;
 
+import com.fossil.attendancetracker.controller.UsersController;
 import com.fossil.attendancetracker.model.Attendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
 import com.fossil.attendancetracker.repository.Attendance2Repository;
@@ -9,6 +10,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -17,11 +20,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Component
 public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(QtrAttendanceRepositoryImpl.class);
+
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMMM-yyyy");
 
     @Autowired
     MongoClient client;
@@ -128,7 +139,6 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
         MongoCollection<Document> collection2 = database.getCollection("qtrAttendance");
         Document query = new Document("_id", attendance.getId());
         Document found = collection2.find(query).first();
-
         if (found != null) {
             String input = attendance.getAttendance();
             switch (input) {
@@ -205,5 +215,41 @@ public class QtrAttendanceRepositoryImpl implements DateWiseRepository {
         query.addCriteria(Criteria.where("emailId").is(emailId).and("quarter").is(quarter).and("year").is(year).and("attendance").is(attendance));
 
         return mongoTemplate.find(query, Attendance.class);
+    }
+
+    @Override
+    public List<Attendance> getUpcomingLeaves() {
+        MongoDatabase database = client.getDatabase("digital-GBS");
+        MongoCollection<Document> collection = database.getCollection("attendance");
+        Date today = new Date();
+        Date twoWeeksFromToday = new Date();
+        twoWeeksFromToday.setTime(today.getTime() + (7L * 24 * 60 * 60 * 1000));
+
+        List<Document> documents = collection.find().into(new ArrayList<>());
+        List<Attendance> attendanceList = new ArrayList<>();
+
+        for (Document doc : documents) {
+            try {
+                String dateStr = doc.getString("date");
+                if (dateStr == null) {
+                    continue;
+                }
+
+                Date attendanceDate = dateFormat.parse(dateStr);
+
+                if (attendanceDate.after(today) && attendanceDate.before(twoWeeksFromToday) && "Leave".equals(doc.getString("attendance"))) {
+                    Attendance attendance = new Attendance();
+                    attendance.setEmailId(doc.getString("emailId"));
+                    attendance.setDate(dateFormat.format(attendanceDate));
+                    attendance.setAttendance(doc.getString("attendance"));
+                    attendanceList.add(attendance);
+                }
+            } catch (ParseException e) {
+                logger.error("Failed to parse date: {}", doc.getString("date"), e);
+            } catch (NullPointerException e) {
+                logger.error("Null value encountered in document: {}", doc.toJson(), e);
+            }
+        }
+        return attendanceList;
     }
 }

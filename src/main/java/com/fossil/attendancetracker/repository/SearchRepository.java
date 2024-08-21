@@ -24,4 +24,8 @@ public interface SearchRepository {
     List<Users> getSubordinates(Users managerId);
 
     Users resetUsersPassword(Users user);
+
+    double getUserLeave(Users user);
+
+    double updateUserLeave(Users user);
 }

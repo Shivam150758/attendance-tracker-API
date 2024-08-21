@@ -1,11 +1,13 @@
 package com.fossil.attendancetracker.controller;
 
 import com.fossil.attendancetracker.model.Attendance;
+import com.fossil.attendancetracker.model.AttendanceRequest;
 import com.fossil.attendancetracker.model.MonthlyAttendance;
 import com.fossil.attendancetracker.model.QtrAttendance;
 import com.fossil.attendancetracker.repository.AdminMethodsRepository;
 import com.fossil.attendancetracker.repository.AttendanceRepository;
 import com.fossil.attendancetracker.repository.DateWiseRepository;
+import com.fossil.attendancetracker.repository.QtrAttendanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,9 @@ public class AttendanceController {
 
     @Autowired
     AdminMethodsRepository adminMethodsRepository;
+
+    @Autowired
+    QtrAttendanceRepository qtrAttendanceRepository;
 
     @GetMapping(value = "/allAttendance")
     public List<Attendance> getAllUsers() {
@@ -71,5 +76,20 @@ public class AttendanceController {
     @PostMapping(value = "/checkAttendance")
     public ResponseEntity<?> findAttendanceById(@RequestBody Attendance attendance) {
         return dateWiseRepository.findAttendanceById(attendance);
+    }
+
+    @PostMapping(value = "/todayAttendance")
+    public List<Attendance> findByEmailIdInAndDate(@RequestBody AttendanceRequest attendanceRequest) {
+        return attendanceRepo.findByEmailIdInAndDate(attendanceRequest.getEmailIds(), attendanceRequest.getDate());
+    }
+
+    @PostMapping(value = "/qtrAttendance")
+    public List<QtrAttendance> findByEmailIdAndQuarterAndYear(@RequestBody AttendanceRequest attendanceRequest) {
+        return qtrAttendanceRepository.findByEmailIdInAndQuarterAndYear(attendanceRequest.getEmailIds(), attendanceRequest.getQuarter(), attendanceRequest.getYear());
+    }
+
+    @PostMapping(value = "/upcomingLeaves")
+    public List<Attendance> getUpcomingLeaves() {
+        return dateWiseRepository.getUpcomingLeaves();
     }
 }

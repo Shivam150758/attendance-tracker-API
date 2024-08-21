@@ -18,4 +18,6 @@ public interface DateWiseRepository {
 
     List<Attendance> findByAttendanceType(String emailId, String quarter, String year, String attendance);
 
+    List<Attendance> getUpcomingLeaves();
+
 }
